@@ -12,8 +12,6 @@ def get_printable_title(header):
         return replace_names[header]
     return header
 
-
-
 def generate_html(headers, talks):
 
     # Begin the HTML document with basic CSS and print configurations
@@ -110,10 +108,23 @@ def write_html(output_html, html_content):
         f.write(html_content)
     print(f"Successfully created {output_html}")
 
+def verify_json(headers):
+    required_headers = [
+        'Start (date)',
+        'Start (time)',
+        'End (time)',
+        'Proposal title',
+    ]
+    for h in required_headers:
+        if not h in headers:
+            return False
+    return True
+
 parser = argparse.ArgumentParser(
                     prog='CalendarExporter',
                     description='A quick script to convert preltax json to html')
 parser.add_argument('json_file')
+
 
 args = parser.parse_args()
 json_file = args.json_file
@@ -125,5 +136,9 @@ with open(json_file, mode='r', encoding='utf-8') as f:
 headers = talks[0].keys()
 # remove ID, always here in json, can't be removed from the export
 headers = [x for x in headers if x != 'ID']
+
+if not verify_json(headers):
+    print("Incorrect export")
+    sys.exit(1)
 
 write_html(html_file, generate_html(headers, talks))
