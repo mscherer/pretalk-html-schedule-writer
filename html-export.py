@@ -1,6 +1,7 @@
 import json
 import sys
 import argparse
+import os.path
 
 def get_printable_title(header):
     replace_names = {
@@ -114,21 +115,40 @@ def verify_json(headers):
         'Start (time)',
         'End (time)',
         'Proposal title',
+        'Room'
     ]
     for h in required_headers:
         if not h in headers:
             return False
     return True
 
+def get_room_list(talks):
+    return {x['Room']['en'] for x in talks if 'Room' in x and x['Room']}
+
+def get_day_list(talks):
+    return {x['Start (date)'] for x in talks if x['Start (date)']}
+
+def filter_talks(talks, room, day):
+    result = []
+    for t in talks:
+        if t['Room'] and t['Room']['en'] == room:
+            if t['Start (date)'] == day:
+                result.append(t)
+    return result
+
+def sorted_by_time(talks):
+        return sorted(talks, key=lambda talk: talk['Start (time)'])
+
+
 parser = argparse.ArgumentParser(
                     prog='CalendarExporter',
                     description='A quick script to convert preltax json to html')
 parser.add_argument('json_file')
-
+parser.add_argument('destination_folder')
 
 args = parser.parse_args()
 json_file = args.json_file
-html_file = json_file[:-len('.json')] + '.html'
+
 
 with open(json_file, mode='r', encoding='utf-8') as f:
     talks = json.load(f)
@@ -141,4 +161,34 @@ if not verify_json(headers):
     print("Incorrect export")
     sys.exit(1)
 
-write_html(html_file, generate_html(headers, talks))
+room_list = get_room_list(talks)
+day_list = get_day_list(talks)
+
+for room in room_list:
+    for day in day_list:
+        filtered_talks = sorted_by_time(filter_talks(talks, room, day))
+
+        output_file = args.destination_folder
+
+        prefix = os.path.basename(json_file[:-len('.json')])
+        output_file = f'{args.destination_folder}/{prefix}-{day}-{room}.html'
+
+        h = headers[:]
+
+        # remove the column we do not want to show
+        h.remove("Room")
+        h.remove("Start (date)")
+
+        # merge the speaker name in the session title
+        for t in filtered_talks:
+            speakers = ', '.join(t['Speaker names'])
+            t['Proposal title'] += ' -- ' + speakers
+        h.remove('Speaker names')
+
+        # reorder the columns
+        h.remove('Start (time)')
+        h.remove('End (time)')
+        h2 = ['Start (time)', 'End (time)']
+        h2.extend(h)
+
+        write_html(output_file, generate_html(h2, filtered_talks))
