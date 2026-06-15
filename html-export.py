@@ -6,8 +6,22 @@ def json_to_html(input_json, output_html):
         talks = json.load(f)
 
     headers = talks[0].keys()
+    # remove ID, always here in json, can't be removed from the export
     headers = [x for x in headers if x != 'ID']
+
     write_html(output_html, generate_html(headers, talks))
+
+def get_printable_title(header):
+    replace_names = {
+        'Start (date)': 'Date',
+        'Start (time)': 'Start',
+        'End (time)': 'End',
+    }
+    if header in replace_names:
+        return replace_names[header]
+    return header
+
+
 
 def generate_html(headers, talks):
 
@@ -74,7 +88,7 @@ def generate_html(headers, talks):
 """
     # Dynamically generate the table headers
     for col in headers:
-            html_content += f"                <th>{col}</th>\n"
+            html_content += f"                <th>{get_printable_title(col)}</th>\n"
     
     html_content += """            </tr>
         </thead>
