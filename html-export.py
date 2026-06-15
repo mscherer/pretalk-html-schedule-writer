@@ -1,15 +1,6 @@
 import json
 import sys
-
-def json_to_html(input_json, output_html):
-    with open(input_json, mode='r', encoding='utf-8') as f:
-        talks = json.load(f)
-
-    headers = talks[0].keys()
-    # remove ID, always here in json, can't be removed from the export
-    headers = [x for x in headers if x != 'ID']
-
-    write_html(output_html, generate_html(headers, talks))
+import argparse
 
 def get_printable_title(header):
     replace_names = {
@@ -119,10 +110,20 @@ def write_html(output_html, html_content):
         f.write(html_content)
     print(f"Successfully created {output_html}")
 
-#parser = argparse.ArgumentParser(
-#                    prog='CalendarExporter',
-#                    description='A quick script to export preltax to html')
+parser = argparse.ArgumentParser(
+                    prog='CalendarExporter',
+                    description='A quick script to convert preltax json to html')
+parser.add_argument('json_file')
 
-json_file = sys.argv[1]
+args = parser.parse_args()
+json_file = args.json_file
 html_file = json_file[:-len('.json')] + '.html'
-json_to_html(json_file, html_file)
+
+with open(json_file, mode='r', encoding='utf-8') as f:
+    talks = json.load(f)
+
+headers = talks[0].keys()
+# remove ID, always here in json, can't be removed from the export
+headers = [x for x in headers if x != 'ID']
+
+write_html(html_file, generate_html(headers, talks))
