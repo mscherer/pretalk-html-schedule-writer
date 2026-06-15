@@ -3,6 +3,7 @@ import sys
 import argparse
 import os.path
 
+
 def get_printable_title(header):
     replace_names = {
         'Start (date)': 'Date',
@@ -12,6 +13,7 @@ def get_printable_title(header):
     if header in replace_names:
         return replace_names[header]
     return header
+
 
 def generate_html(headers, talks):
 
@@ -78,22 +80,22 @@ def generate_html(headers, talks):
 """
     # Dynamically generate the table headers
     for col in headers:
-            html_content += f"                <th>{get_printable_title(col)}</th>\n"
-    
+        html_content += f"                <th>{get_printable_title(col)}</th>\n"
+
     html_content += """            </tr>
         </thead>
         <tbody>
 """
-    
+
     # Dynamically generate the table rows and cells
     for row in talks:
-        if row['Start (date)']: 
+        if row['Start (date)']:
             html_content += "            <tr>\n"
             for col in headers:
-                    c = row[col]
-                    if type(c) == type({}):
-                        c = c['en']
-                    html_content += f"                <td>{c}</td>\n"
+                c = row[col]
+                if type(c) == type({}):
+                    c = c['en']
+                html_content += f"                <td>{c}</td>\n"
             html_content += "            </tr>\n"
 
     html_content += """        </tbody>
@@ -103,11 +105,13 @@ def generate_html(headers, talks):
 """
     return html_content
 
+
 def write_html(output_html, html_content):
     # Write the completed string out to the HTML file
     with open(output_html, mode='w', encoding='utf-8') as f:
         f.write(html_content)
     print(f"Successfully created {output_html}")
+
 
 def verify_json(headers):
     required_headers = [
@@ -122,11 +126,14 @@ def verify_json(headers):
             return False
     return True
 
+
 def get_room_list(talks):
     return {x['Room']['en'] for x in talks if 'Room' in x and x['Room']}
 
+
 def get_day_list(talks):
     return {x['Start (date)'] for x in talks if x['Start (date)']}
+
 
 def filter_talks(talks, room, day):
     result = []
@@ -136,13 +143,14 @@ def filter_talks(talks, room, day):
                 result.append(t)
     return result
 
+
 def sorted_by_time(talks):
-        return sorted(talks, key=lambda talk: talk['Start (time)'])
+    return sorted(talks, key=lambda talk: talk['Start (time)'])
 
 
 parser = argparse.ArgumentParser(
-                    prog='CalendarExporter',
-                    description='A quick script to convert preltax json to html')
+    prog='CalendarExporter',
+    description='A quick script to convert preltax json to html')
 parser.add_argument('json_file')
 parser.add_argument('destination_folder')
 
