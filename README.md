@@ -15,6 +15,7 @@ On the first tab (CSV/JSON exports), select:
 - Start (date)
 - Start (time)
 - End (time)
+- Room
 
 You can also select "Tracks" or "Session type".
 
