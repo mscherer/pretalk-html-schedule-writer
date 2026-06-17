@@ -1,4 +1,4 @@
-Quick script to generate a printable table for pretalk
+Quick script to generate a printable table for pretalx
 
 How to use it
 =============
