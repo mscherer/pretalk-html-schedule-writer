@@ -15,7 +15,7 @@ def get_printable_title(header):
     return header
 
 
-def generate_html(headers, talks):
+def generate_html(headers, talks, title):
 
     # Begin the HTML document with basic CSS and print configurations
     html_content = """<!DOCTYPE html>
@@ -72,9 +72,10 @@ def generate_html(headers, talks):
         }
     </style>
 </head>
-<body>
-    <h1>Sessions</h1>
-    <table>
+<body>"""
+
+    html_content += f"<h1>{title}</h1>"
+    html_content += """    <table>
         <thead>
             <tr>
 """
@@ -199,4 +200,4 @@ for room in room_list:
         h2 = ['Start (time)', 'End (time)']
         h2.extend(h)
 
-        write_html(output_file, generate_html(h2, filtered_talks))
+        write_html(output_file, generate_html(h2, filtered_talks, f"{room} - {day}"))
